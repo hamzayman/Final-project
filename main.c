@@ -44,7 +44,7 @@ if(fp==NULL){
       token=strtok(NULL,",");
       strcpy(accounts[count].status,token);
       count++;
-      printf("hahahaha");
+      
 
     }
 fclose(fp);}
