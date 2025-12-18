@@ -4,7 +4,7 @@
 typedef struct 
 {
     int month;
-    int year;
+    int year; 
 }date;
 
 typedef struct{
@@ -44,5 +44,7 @@ if(fp==NULL){
       token=strtok(NULL,",");
       strcpy(accounts[count].status,token);
       count++;
-}
+      printf("hahahaha");
+
+    }
 fclose(fp);}
