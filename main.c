@@ -1,6 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+void menu(){
+print
+
+
+
+}
 
 
 int login(){
@@ -65,7 +71,7 @@ void startmenu(void)
             exit(0);
            }if( login_result==1){
             printf("USER CONFIRMED\n");
-            exit(0);
+            menu();
            }
         }
         else
