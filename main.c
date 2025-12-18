@@ -64,7 +64,6 @@ void startmenu(void)
             exit(0);
            }if( login_result==1){
             printf("USER CONFIRMED\n");
-            menu();
            }
         }
         else
