@@ -1,6 +1,53 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "loadacc.c"
+
+void menu(){
+char select[100];
+printf("- ADD\n- DELETE \n- MODIFY\n- SEARCH\n- ADVANCED SEARCH\n - CHANGE_STATUS\n- WIRHDRAW\n- DEPOSIT\n- TRANSFER\n- REPORT\n- PRINT\n- QUIT\n");
+gets(select);
+getchar();
+while (1){
+if(strcmp(select,"ADD")==0){
+    printf("ADD SELECTED , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"DELETE")==0){
+    printf("DELETE SELECTED , PROCCESSING");  //matensash t7ot el functioN
+    break;}
+if(strcmp(select,"MODIFY")==0){
+    printf("MODIFY SELECTED , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"SEARCH")==0){
+    printf("SEARCH SELECTED , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"ADVANCED SEARCH")==0){
+    printf("ADVANCED SEARCH , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"CHANGE_STATUS")==0){
+    printf("CHANGE_STATUS , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"WHITHDRAW")==0){
+    printf("WHITHDRAW SELECTED , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"DEPOSIT")==0){
+    printf("DEPOSIT SELECTED , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"TRANSFER")==0){
+    printf("TRANSFER SELECTED , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"REPORT")==0){
+    printf("REPORT SELECTED , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"QUIT")==0){
+    printf("QUIT SELECTED , PROCCESSING");  //matensash t7ot el function
+    break;}
+if(strcmp(select,"PRINT")==0){
+    printf("PRINT SELECTED , PROCCESSING");  //matensash t7ot el function
+        break;}
+    else printf("invalid input, try again");
+}
+}
 
 
 int login(){
@@ -27,7 +74,6 @@ while (fscanf(fp,"%49s %49s",f_user,f_pass)==2){        // ==2 yaany while it re
         return 1; // login success
         
     }
-
 }
 fclose(fp);
 return 0; // login failed
@@ -37,7 +83,7 @@ void startmenu(void)
 {
     int x;
     int result;
-
+    
     while (1)
     {
         printf("\n1: LOGIN\n0: QUIT\n");
@@ -65,7 +111,7 @@ void startmenu(void)
             exit(0);
            }if( login_result==1){
             printf("USER CONFIRMED\n");
-            exit(0);
+            loadaccounts();
            }
         }
         else

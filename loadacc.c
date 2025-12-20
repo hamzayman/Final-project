@@ -17,7 +17,8 @@ typedef struct{
     char status[100];
    
 }account;
-void loadaccounts(account accounts[]){
+void loadaccounts(){
+    account accounts[30];
     char x[300];
     int count=0;
 
@@ -33,6 +34,7 @@ if(fp==NULL){
     accounts[count].accountnumber= atoll(token); //el atoi bethawel mn string le long long
     token=strtok(NULL,",");
     strcpy(accounts[count].name,token);
+
     token=strtok(NULL,",");
     strcpy(accounts[count].address,token);
      token=strtok(NULL,",");
