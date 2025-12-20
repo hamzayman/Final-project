@@ -1,28 +1,14 @@
+#include "loadacc.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-typedef struct 
-{
-    int month;
-    int year;
-}date;
 
-typedef struct{
-    long long accountnumber;
-    char name[100];
-     char address[100];
-     float balance;
-    long long mobile;
-     date dateopened;
-    char status[100];
-   
-}account;
-void loadaccounts(){
+void loadaccounts(void){
     account accounts[30];
     char x[300];
     int count=0;
 
-    FILE *fp=fopen("account.txt","r");
+    FILE *fp=fopen("accounts.txt","r");
 if(fp==NULL){
     printf("error opening file");
     return;
@@ -38,13 +24,14 @@ if(fp==NULL){
     token=strtok(NULL,",");
     strcpy(accounts[count].address,token);
      token=strtok(NULL,",");
-    accounts[count].balance =atof(token); //el atof bethawel mn string le float
+    accounts[count].balance =(float)atof(token); //el atof bethawel mn string le float
     token=strtok(NULL,",");
     accounts[count].mobile = atoll(token);
      token=strtok(NULL,",");
      sscanf(token, "%d-%d", &accounts[count].dateopened.month, &accounts[count].dateopened.year);
       token=strtok(NULL,",");
       strcpy(accounts[count].status,token);
+
       count++;
 }
 fclose(fp);}
