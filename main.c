@@ -3,10 +3,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-void menu()
+void menu(account accounts[], int count,int *accFound)
 {
     char select[100];
-    printf("- ADD\n- DELETE \n- MODIFY\n- SEARCH\n- ADVANCED SEARCH\n- CHANGE_STATUS\n- WIRHDRAW\n- DEPOSIT\n- TRANSFER\n- REPORT\n- PRINT\n- QUIT\n");
+    printf("- ADD\n- DELETE \n- MODIFY\n- SEARCH\n- ADVANCED SEARCH\n- CHANGE STATUS\n- WITHDRAW\n- DEPOSIT\n- TRANSFER\n- REPORT\n- PRINT\n- QUIT\n");
     fflush(stdout);
     while (1)
     {
@@ -16,70 +16,77 @@ void menu()
             continue;
         }
 
-        // remove trailing newline
         select[strcspn(select, "\n")] = '\0';
         if (strcmp(select, "ADD") == 0)
         {
-            printf("ADD SELECTED , PROCCESSING"); // matensash t7ot el function
+            printf("ADD SELECTED , PROCCESSING\n"); // matensash t7ot el function
             break;
         }
-        if (strcmp(select, "DELETE") == 0)
+        else if (strcmp(select, "DELETE") == 0)
         {
-            printf("DELETE SELECTED , PROCCESSING"); // matensash t7ot el functioN
+            printf("DELETE SELECTED , PROCCESSING\n");
+             // matensash t7ot el functioN
             break;
         }
-        if (strcmp(select, "MODIFY") == 0)
+        else if (strcmp(select, "MODIFY") == 0)
         {
-            printf("MODIFY SELECTED , PROCCESSING"); // matensash t7ot el function
+            printf("MODIFY SELECTED , PROCCESSING\n"); // matensash t7ot el function
+            modifyAccount(accounts,count);
             break;
         }
-        if (strcmp(select, "SEARCH") == 0)
+        else if (strcmp(select, "SEARCH") == 0)
         {
-            printf("SEARCH SELECTED , PROCCESSING"); // matensash t7ot el function
+            printf("SEARCH SELECTED , PROCCESSING\n"); // matensash t7ot el function
+            querySearch(accounts,count,accFound);
             break;
         }
-        if (strcmp(select, "ADVANCED SEARCH") == 0)
+        else if (strcmp(select, "ADVANCED SEARCH") == 0)
         {
-            printf("ADVANCED SEARCH , PROCCESSING"); // matensash t7ot el function
+            printf("ADVANCED SEARCH , PROCCESSING\n"); // matensash t7ot el function
+            advancedSearch(accounts,count,accFound);
             break;
         }
-        if (strcmp(select, "CHANGE_STATUS") == 0)
+        else if (strcmp(select, "CHANGE STATUS") == 0)
         {
-            printf("CHANGE_STATUS , PROCCESSING"); // matensash t7ot el function
+            printf("CHANGE_STATUS , PROCCESSING\n"); // matensash t7ot el function
+            changeStatus(accounts,count);
             break;
         }
-        if (strcmp(select, "WHITHDRAW") == 0)
+        else if (strcmp(select, "WITHDRAW") == 0)
         {
-            printf("WHITHDRAW SELECTED , PROCCESSING"); // matensash t7ot el function
+            printf("WITHDRAW SELECTED , PROCCESSING\n"); // matensash t7ot el function
             break;
         }
-        if (strcmp(select, "DEPOSIT") == 0)
+       else  if (strcmp(select, "DEPOSIT") == 0)
         {
-            printf("DEPOSIT SELECTED , PROCCESSING"); // matensash t7ot el function
+            printf("DEPOSIT SELECTED , PROCCESSING\n"); // matensash t7ot el function
             break;
         }
-        if (strcmp(select, "TRANSFER") == 0)
+        else if (strcmp(select, "TRANSFER") == 0)
         {
-            printf("TRANSFER SELECTED , PROCCESSING"); // matensash t7ot el function
+            printf("TRANSFER SELECTED , PROCCESSING\n"); // matensash t7ot el function
             break;
         }
-        if (strcmp(select, "REPORT") == 0)
+        else if (strcmp(select, "REPORT") == 0)
         {
-            printf("REPORT SELECTED , PROCCESSING"); // matensash t7ot el function
+            printf("REPORT SELECTED , PROCCESSING\n"); // matensash t7ot el function
             break;
         }
-        if (strcmp(select, "QUIT") == 0)
+        else if (strcmp(select, "QUIT") == 0)
         {
-            printf("QUIT SELECTED , PROCCESSING"); // matensash t7ot el function
+            printf("QUIT SELECTED , PROCCESSING\n"); // matensash t7ot el function
+            printf("Thank you!\nQUITTING.\n");
+            exit(0);
             break;
         }
-        if (strcmp(select, "PRINT") == 0)
+        else if (strcmp(select, "PRINT") == 0)
         {
-            printf("PRINT SELECTED , PROCCESSING"); // matensash t7ot el function
+            printf("PRINT SELECTED , PROCCESSING\n"); // matensash t7ot el function
+            printAccounts(accounts,count);
             break;
         }
         else
-            printf("invalid input, try again");
+            printf("invalid input, try again\n");
     }
 }
 
@@ -118,7 +125,8 @@ void startmenu(void)
 {
     int x;
     int result;
-
+    int count;
+    int accFound;
     while (1)
     {
         printf("\n1: LOGIN\n0: QUIT\n");
@@ -151,9 +159,12 @@ void startmenu(void)
             if (login_result == 1)
             {
                 printf("USER CONFIRMED\n");
-                loadaccounts();
 
-                menu();
+                account *accounts=loadaccounts(&count);
+                
+                menu(accounts,count,&accFound);
+                free(accounts);
+                
                 break;
             }
         }

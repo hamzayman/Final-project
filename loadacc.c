@@ -3,17 +3,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-void loadaccounts(void)
+account *loadaccounts(int *count)
 {
-    account accounts[30];
+    account *accounts = malloc(30 * sizeof(account));
     char x[300];
-    int *count = 0;
+    *count = 0;
+
+    if (accounts == NULL)
+    {
+        printf("Memory allocation failed\n");
+        return NULL;
+    }
 
     FILE *fp = fopen("accounts.txt", "r");
     if (fp == NULL)
     {
         printf("error opening file");
-        return;
+        free(accounts);
+        return NULL;
     }
     while (fgets(x, sizeof(x), fp) != NULL)
     {
@@ -40,6 +47,7 @@ void loadaccounts(void)
         (*count)++;
     }
     fclose(fp);
+    return accounts;
 }
 void sortByName(account accounts[], int count)
 {
@@ -135,8 +143,9 @@ void printAccounts(account accounts[], int count)
         printf("balance: %f\n", accounts[i].balance);
         printf("mobile: %lld\n", accounts[i].mobile);
         printf("date opened: %d-%d\n", accounts[i].dateopened.month, accounts[i].dateopened.year);
-        printf("status: %s\n", accounts[i].status);
+        printf("status: %s\n\n\n\n\n", accounts[i].status);
     }
+    asktocontinue();
 }
 const char *getMonthName(int month)
 {
@@ -175,8 +184,9 @@ void querySearch(account accounts[], int count, int *accFound)
     long long searchnumber;
     int found = 0;
     *accFound = 0;
-    printf("input account number to search");
+    printf("input account number to search\n");
     scanf("%lld", &searchnumber);
+    getchar();
     for (int i = 0; i < count; i++)
     {
         if (accounts[i].accountnumber == searchnumber)
@@ -195,6 +205,7 @@ void querySearch(account accounts[], int count, int *accFound)
     }
     if (!found)
         printf("\n account not found\n");
+    asktocontinue();
 }
 void advancedSearch(account accounts[], int count, int *accFound)
 {
@@ -215,7 +226,7 @@ void advancedSearch(account accounts[], int count, int *accFound)
             printf("balance: %f\n", accounts[i].balance);
             printf("mobile: %lld\n", accounts[i].mobile);
             printf("date opened: %s %d\n", getMonthName(accounts[i].dateopened.month), accounts[i].dateopened.year);
-            printf("status: %s\n", accounts[i].status);
+            printf("status: %s\n\n\n\n", accounts[i].status);
             found = 1;
             (*accFound)++;
         }
@@ -223,12 +234,13 @@ void advancedSearch(account accounts[], int count, int *accFound)
 
     if (!found)
         printf("\nthe keyword is not found in any account\n");
+    asktocontinue();
 }
 void modifyAccount(account accounts[], int count)
 {
     long long accnum;
     int found = 0;
-    printf("input account number to modify");
+    printf("input account number to modify\n");
     scanf("%lld", &accnum);
     for (int i = 0; i < count; i++)
     {
@@ -266,7 +278,9 @@ void modifyAccount(account accounts[], int count)
         }
     }
     if (!found)
-        printf("couldn't find account %lld to be modified", accnum);
+        printf("couldn't find account %lld to be modified\n", accnum);
+        saveaccounts(accounts,count);
+    asktocontinue();
 }
 void changeStatus(account accounts[], int count)
 {
@@ -301,6 +315,7 @@ void changeStatus(account accounts[], int count)
             else
             {
                 strcpy(accounts[i].status, newStatus);
+                saveaccounts(accounts,count);
                 printf("account status updated successfully to %s\n", accounts[i].status);
             }
             break;
@@ -308,5 +323,94 @@ void changeStatus(account accounts[], int count)
     }
 
     if (!found)
-        printf("account number %lld is not found", accNum);
+        printf("account number %lld is not found\n", accNum);
+    
+    asktocontinue();
+}
+
+void asktocontinue()
+{
+
+    char input[10];
+    int count;
+    int accFound;
+    fflush(stdout);
+    printf("Do you want to do any other operations ? :(Y/N)\n");
+    while (1)
+    {
+        if (!fgets(input, sizeof(input), stdin))
+        {
+            printf("invalid input\n");
+            continue;
+        }
+        input[strcspn(input, "\n")] = '\0'; // Remove newline
+        if (strcmp(input, "y") == 0 || strcmp(input, "Y") == 0)
+        {
+            account *accounts=loadaccounts(&count);
+            menu(accounts,count,&accFound);
+            free(accounts);
+            break;
+        }
+        else if (strcmp(input, "n") == 0 || strcmp(input, "N") == 0)
+        {
+
+            printf("Thank you!\nQUITTING.\n");
+            exit(0);
+        }
+        else
+        {
+            printf("invalid input , try again\n");
+        }
+    }
+}
+void saveaccounts(account accounts[], int count)
+{
+    char input[10];
+    printf("Do you want to save changes to file? (Y/N): ");
+    
+    while (1)
+    {
+        if (!fgets(input, sizeof(input), stdin))
+        {
+            printf("Invalid input\n");
+            continue;
+        }
+        input[strcspn(input, "\n")] = '\0';  // Remove newline
+        
+        if (strcmp(input, "y") == 0 || strcmp(input, "Y") == 0)
+        {
+            FILE *fp = fopen("accounts.txt", "w");
+            if (fp == NULL)
+            {
+                printf("Error opening file for writing\n");
+                return;
+            }
+            
+            for (int i = 0; i < count; i++)
+            {
+                fprintf(fp, "%lld,%s,%s,%.2f,%lld,%d-%d,%s\n",
+                        accounts[i].accountnumber,
+                        accounts[i].name,
+                        accounts[i].address,
+                        accounts[i].balance,
+                        accounts[i].mobile,
+                        accounts[i].dateopened.month,
+                        accounts[i].dateopened.year,
+                        accounts[i].status);
+            }
+            
+            fclose(fp);
+            printf("Changes saved successfully!\n");
+            break;
+        }
+        else if (strcmp(input, "n") == 0 || strcmp(input, "N") == 0)
+        {
+            printf("Changes not saved.\n");
+            break;
+        }
+        else
+        {
+            printf("Invalid input, try again (Y/N): ");
+        }
+    }
 }
