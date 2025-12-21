@@ -19,5 +19,15 @@ typedef struct
 } account;
 
 void loadaccounts(void);
+void sortByName(account accounts[], int count);
+void sortByBalance(account accounts[], int count);
+void sortByDate(account accounts[], int count);
+void sortByStatus(account accounts[], int count);
+void printAccounts(account accounts[], int count);
+const char *getMonthName(int month);
+void querySearch(account accounts[], int count, int *accFound);
+void advancedSearch(account accounts[], int count, int *accFound);
+void modifyAccount(account accounts[], int count);
+void changeStatus(account accounts[], int count);
 
 #endif
