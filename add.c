@@ -144,6 +144,10 @@ void deleteAccount() {
 
     fclose(fp);
 }
+int main(){
+    addAccount();
+    return 0;
+}
 
 
 
