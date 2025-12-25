@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include"ctype.h"
+#include "ctype.h"
 
 account *loadaccounts(int *count)
 {
@@ -239,8 +239,6 @@ void advancedSearch(account accounts[], int *count, int *accFound)
     asktocontinue();
 }
 
-
-
 void asktocontinue()
 {
 
@@ -252,9 +250,10 @@ void asktocontinue()
         printf("Memory allocation failed!\n");
         return;
     }
-    *count=0;
-    *accFound=0;
-    while (getchar() != '\n');
+    *count = 0;
+    *accFound = 0;
+    while (getchar() != '\n')
+        ;
     printf("Do you want to do any other operations ? :(Y/N)\n");
     while (1)
     {
@@ -266,8 +265,8 @@ void asktocontinue()
         input[strcspn(input, "\n")] = '\0'; // Remove newline
         if (strcmp(input, "y") == 0 || strcmp(input, "Y") == 0)
         {
-            account *accounts=loadaccounts(count);
-            menu(accounts,count,accFound);
+            account *accounts = loadaccounts(count);
+            menu(accounts, count, accFound);
             free(count);
             free(accFound);
             free(accounts);
@@ -289,7 +288,7 @@ void saveaccounts(account accounts[], int *count)
 {
     char input[10];
     printf("Do you want to save changes to file? (Y/N): ");
-    
+
     while (1)
     {
         if (!fgets(input, sizeof(input), stdin))
@@ -297,8 +296,8 @@ void saveaccounts(account accounts[], int *count)
             printf("Invalid input\n");
             continue;
         }
-        input[strcspn(input, "\n")] = '\0';  // Remove newline
-        
+        input[strcspn(input, "\n")] = '\0'; // Remove newline
+
         if (strcmp(input, "y") == 0 || strcmp(input, "Y") == 0)
         {
             FILE *fp = fopen("accounts.txt", "w");
@@ -307,7 +306,7 @@ void saveaccounts(account accounts[], int *count)
                 printf("Error opening file for writing\n");
                 return;
             }
-            
+
             for (int i = 0; i < *count; i++)
             {
                 fprintf(fp, "%lld,%s,%s,%.2f,%lld,%d-%d,%s\n",
@@ -320,7 +319,7 @@ void saveaccounts(account accounts[], int *count)
                         accounts[i].dateopened.year,
                         accounts[i].status);
             }
-            
+
             fclose(fp);
             printf("Changes saved successfully!\n");
             break;
@@ -336,7 +335,7 @@ void saveaccounts(account accounts[], int *count)
         }
     }
 }
-void menu(account accounts[], int *count,int *accFound)
+void menu(account accounts[], int *count, int *accFound)
 {
     char select[100];
     printf("- ADD\n- DELETE \n- MODIFY\n- SEARCH\n- ADVANCED SEARCH\n- CHANGE STATUS\n- WITHDRAW\n- DEPOSIT\n- TRANSFER\n- REPORT\n- PRINT\n- QUIT\n");
@@ -353,38 +352,38 @@ void menu(account accounts[], int *count,int *accFound)
         if (strcmp(select, "ADD") == 0)
         {
             printf("ADD SELECTED , PROCCESSING\n"); // matensash t7ot el function
-            addAccount(accounts,count);
+            addAccount(accounts, count);
             break;
         }
         else if (strcmp(select, "DELETE") == 0)
         {
             printf("DELETE SELECTED , PROCCESSING\n");
-             // matensash t7ot el functioN
-             deleteAccount(accounts,count);
+            // matensash t7ot el functioN
+            deleteAccount(accounts, count);
             break;
         }
         else if (strcmp(select, "MODIFY") == 0)
         {
             printf("MODIFY SELECTED , PROCCESSING\n"); // matensash t7ot el function
-            modifyAccount(accounts,count);
+            modifyAccount(accounts, count);
             break;
         }
         else if (strcmp(select, "SEARCH") == 0)
         {
             printf("SEARCH SELECTED , PROCCESSING\n"); // matensash t7ot el function
-            querySearch(accounts,count,accFound);
+            querySearch(accounts, count, accFound);
             break;
         }
         else if (strcmp(select, "ADVANCED SEARCH") == 0)
         {
             printf("ADVANCED SEARCH , PROCCESSING\n"); // matensash t7ot el function
-            advancedSearch(accounts,count,accFound);
+            advancedSearch(accounts, count, accFound);
             break;
         }
         else if (strcmp(select, "CHANGE STATUS") == 0)
         {
             printf("CHANGE_STATUS , PROCCESSING\n"); // matensash t7ot el function
-            changeStatus(accounts,count);
+            changeStatus(accounts, count);
             break;
         }
         else if (strcmp(select, "WITHDRAW") == 0)
@@ -392,7 +391,7 @@ void menu(account accounts[], int *count,int *accFound)
             printf("WITHDRAW SELECTED , PROCCESSING\n"); // matensash t7ot el function
             break;
         }
-       else  if (strcmp(select, "DEPOSIT") == 0)
+        else if (strcmp(select, "DEPOSIT") == 0)
         {
             printf("DEPOSIT SELECTED , PROCCESSING\n"); // matensash t7ot el function
             break;
@@ -417,7 +416,7 @@ void menu(account accounts[], int *count,int *accFound)
         else if (strcmp(select, "PRINT") == 0)
         {
             printf("PRINT SELECTED , PROCCESSING\n"); // matensash t7ot el function
-            printAccounts(accounts,count);
+            printAccounts(accounts, count);
             break;
         }
         else
@@ -460,17 +459,17 @@ void startmenu(void)
 {
     int x;
     int result;
-    int *count=malloc(sizeof(int));
-    int *accFound=malloc(sizeof(int));
-    
-        if (count == NULL || accFound == NULL)
+    int *count = malloc(sizeof(int));
+    int *accFound = malloc(sizeof(int));
+
+    if (count == NULL || accFound == NULL)
     {
         printf("Memory allocation failed!\n");
         exit(1);
     }
-    *count =0;
-    *accFound=0;
-    
+    *count = 0;
+    *accFound = 0;
+
     while (1)
     {
         printf("\n1: LOGIN\n0: QUIT\n");
@@ -506,13 +505,13 @@ void startmenu(void)
             {
                 printf("USER CONFIRMED\n");
 
-                account *accounts=loadaccounts(count);
-                
-                menu(accounts,count,accFound);
+                account *accounts = loadaccounts(count);
+
+                menu(accounts, count, accFound);
                 free(accFound);
                 free(count);
                 free(accounts);
-                
+
                 break;
             }
         }
