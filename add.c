@@ -4,9 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 
-int isDuplicateAccount(account accounts[], int count, long long accNo)
+int isDuplicateAccount(account accounts[], int *count, long long accNo)
 {
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == accNo)
         {
@@ -15,7 +15,7 @@ int isDuplicateAccount(account accounts[], int count, long long accNo)
     }
     return 0;  // No duplicate
 }
-void addAccount(account accounts[],int count)
+void addAccount(account accounts[],int *count)
 {
    
     if (accounts == NULL)
@@ -66,22 +66,22 @@ void addAccount(account accounts[],int count)
     address[strcspn(address, "\n")] = '\0';
     
     // Add new account to array
-    if (count >= 100) {
+    if (*count >= 100) {
         printf("Error: Maximum account limit reached!\n");
         free(accounts);
         asktocontinue();
         return;
     }
     
-    accounts[count].accountnumber = accNo;
-    strcpy(accounts[count].name, name);
-    strcpy(accounts[count].address, address);
-    accounts[count].balance = balance;
-    accounts[count].mobile = mobile;
-    accounts[count].dateopened.month = month;
-    accounts[count].dateopened.year = year;
-    strcpy(accounts[count].status, status);
-    count++;
+    accounts[*count].accountnumber = accNo;
+    strcpy(accounts[*count].name, name);
+    strcpy(accounts[*count].address, address);
+    accounts[*count].balance = balance;
+    accounts[*count].mobile = mobile;
+    accounts[*count].dateopened.month = month;
+    accounts[*count].dateopened.year = year;
+    strcpy(accounts[*count].status, status);
+    *count++;
     
     printf("\nAccount added successfully on %d-%d\n", month, year);
     
@@ -90,7 +90,7 @@ void addAccount(account accounts[],int count)
     // Ask to continue
     asktocontinue();
 }
-void deleteAccount(account accounts[], int count)
+void deleteAccount(account accounts[], int *count)
 {
     if (accounts == NULL)
     {
@@ -98,7 +98,7 @@ void deleteAccount(account accounts[], int count)
         return;
     }
     
-    if (count == 0)
+    if (*count == 0)
     {
         printf("No accounts found in the system.\n");
         return;
@@ -112,7 +112,7 @@ void deleteAccount(account accounts[], int count)
     scanf("%lld", &accToDelete);
     while (getchar() != '\n');
     
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == accToDelete)
         {
@@ -127,11 +127,11 @@ void deleteAccount(account accounts[], int count)
             else
             {
                 // Shift all accounts after this one to the left
-                for (int j = i; j < count - 1; j++)
+                for (int j = i; j < *count - 1; j++)
                 {
                     accounts[j] = accounts[j + 1];
                 }
-                (count)--;  // Decrease the count
+                (*count)--;  // Decrease the *count
                 printf("Account deleted successfully.\n");
                 break;
             }
@@ -145,16 +145,19 @@ void deleteAccount(account accounts[], int count)
     }
     
     // Save changes to file
-    saveaccounts(accounts, count);
+    saveaccounts(accounts,count);
     asktocontinue();
 }
-void modifyAccount(account accounts[], int count)
+void multidelete(account accounts[],int *count,int *accfound){
+
+}
+void modifyAccount(account accounts[], int *count)
 {
     long long accnum;
     int found = 0;
     printf("input account number to modify\n");
     scanf("%lld", &accnum);
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == accnum)
         {
@@ -194,14 +197,14 @@ void modifyAccount(account accounts[], int count)
         saveaccounts(accounts,count);
     asktocontinue();
 }
-void changeStatus(account accounts[], int count)
+void changeStatus(account accounts[], int *count)
 {
     long long accNum;
     int found = 0;
     printf("\nenter account number to change status\n");
     scanf("%lld", &accNum);
     getchar();
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == accNum)
         {

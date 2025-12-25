@@ -51,12 +51,12 @@ account *loadaccounts(int *count)
     fclose(fp);
     return accounts;
 }
-void sortByName(account accounts[], int count)
+void sortByName(account accounts[], int *count)
 {
     account temp;
-    for (int i = 0; i < count - 1; i++)
+    for (int i = 0; i < *count - 1; i++)
     {
-        for (int j = i + 1; j < count; j++)
+        for (int j = i + 1; j < *count; j++)
             if (_stricmp(accounts[i].name, accounts[j].name) > 0)
             {
                 temp = accounts[i];
@@ -65,12 +65,12 @@ void sortByName(account accounts[], int count)
             }
     }
 }
-void sortByBalance(account accounts[], int count)
+void sortByBalance(account accounts[], int *count)
 {
     account temp;
-    for (int i = 0; i < count - 1; i++)
+    for (int i = 0; i < *count - 1; i++)
     {
-        for (int j = i + 1; j < count; j++)
+        for (int j = i + 1; j < *count; j++)
             if (accounts[i].balance > accounts[j].balance)
             {
                 temp = accounts[i];
@@ -79,12 +79,12 @@ void sortByBalance(account accounts[], int count)
             }
     }
 }
-void sortByDate(account accounts[], int count)
+void sortByDate(account accounts[], int *count)
 {
     account temp;
-    for (int i = 0; i < count - 1; i++)
+    for (int i = 0; i < *count - 1; i++)
     {
-        for (int j = i + 1; j < count; j++)
+        for (int j = i + 1; j < *count; j++)
             if (accounts[i].dateopened.year > accounts[j].dateopened.year || (accounts[i].dateopened.year == accounts[j].dateopened.year && accounts[i].dateopened.month > accounts[j].dateopened.month))
             {
                 temp = accounts[i];
@@ -93,12 +93,12 @@ void sortByDate(account accounts[], int count)
             }
     }
 }
-void sortByStatus(account accounts[], int count)
+void sortByStatus(account accounts[], int *count)
 {
     account temp;
-    for (int i = 0; i < count - 1; i++)
+    for (int i = 0; i < *count - 1; i++)
     {
-        for (int j = i + 1; j < count; j++)
+        for (int j = i + 1; j < *count; j++)
             if (strcmp(accounts[i].status, accounts[j].status) > 0)
             {
                 temp = accounts[i];
@@ -107,7 +107,7 @@ void sortByStatus(account accounts[], int count)
             }
     }
 }
-void printAccounts(account accounts[], int count)
+void printAccounts(account accounts[], int *count)
 {
     int choice;
     printf("\n you need accounts to be sorted by:\n");
@@ -138,7 +138,7 @@ void printAccounts(account accounts[], int count)
         return;
     }
     printf("\n accounts list\n");
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < *count; i++)
     {
         printf("account number: %lld\n", accounts[i].accountnumber);
         printf("name: %s\n", accounts[i].name);
@@ -182,15 +182,14 @@ const char *getMonthName(int month)
         return "Invalid month";
     }
 }
-void querySearch(account accounts[], int count, int *accFound)
+void querySearch(account accounts[], int *count, int *accFound)
 {
     long long searchnumber;
     int found = 0;
-    *accFound = 0;
     printf("input account number to search\n");
     scanf("%lld", &searchnumber);
     getchar();
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == searchnumber)
         {
@@ -210,7 +209,7 @@ void querySearch(account accounts[], int count, int *accFound)
         printf("\n account not found\n");
     asktocontinue();
 }
-void advancedSearch(account accounts[], int count, int *accFound)
+void advancedSearch(account accounts[], int *count, int *accFound)
 {
     char keyword[100];
     int found = 0;
@@ -219,7 +218,7 @@ void advancedSearch(account accounts[], int count, int *accFound)
     getchar();
     fgets(keyword, sizeof(keyword), stdin);
     keyword[strcspn(keyword, "\n")] = '\0';
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < *count; i++)
     {
         if (strstr(accounts[i].name, keyword) != NULL)
         {
@@ -246,9 +245,16 @@ void asktocontinue()
 {
 
     char input[10];
-    int count;
-    int accFound;
-    fflush(stdout);
+    int *count = malloc(sizeof(int));
+    int *accFound = malloc(sizeof(int));
+    if (count == NULL || accFound == NULL)
+    {
+        printf("Memory allocation failed!\n");
+        return;
+    }
+    *count=0;
+    *accFound=0;
+    while (getchar() != '\n');
     printf("Do you want to do any other operations ? :(Y/N)\n");
     while (1)
     {
@@ -260,8 +266,10 @@ void asktocontinue()
         input[strcspn(input, "\n")] = '\0'; // Remove newline
         if (strcmp(input, "y") == 0 || strcmp(input, "Y") == 0)
         {
-            account *accounts=loadaccounts(&count);
-            menu(accounts,count,&accFound);
+            account *accounts=loadaccounts(count);
+            menu(accounts,count,accFound);
+            free(count);
+            free(accFound);
             free(accounts);
             break;
         }
@@ -277,7 +285,7 @@ void asktocontinue()
         }
     }
 }
-void saveaccounts(account accounts[], int count)
+void saveaccounts(account accounts[], int *count)
 {
     char input[10];
     printf("Do you want to save changes to file? (Y/N): ");
@@ -300,7 +308,7 @@ void saveaccounts(account accounts[], int count)
                 return;
             }
             
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < *count; i++)
             {
                 fprintf(fp, "%lld,%s,%s,%.2f,%lld,%d-%d,%s\n",
                         accounts[i].accountnumber,
@@ -328,7 +336,7 @@ void saveaccounts(account accounts[], int count)
         }
     }
 }
-void menu(account accounts[], int count,int *accFound)
+void menu(account accounts[], int *count,int *accFound)
 {
     char select[100];
     printf("- ADD\n- DELETE \n- MODIFY\n- SEARCH\n- ADVANCED SEARCH\n- CHANGE STATUS\n- WITHDRAW\n- DEPOSIT\n- TRANSFER\n- REPORT\n- PRINT\n- QUIT\n");
@@ -452,8 +460,17 @@ void startmenu(void)
 {
     int x;
     int result;
-    int count;
-    int accFound;
+    int *count=malloc(sizeof(int));
+    int *accFound=malloc(sizeof(int));
+    
+        if (count == NULL || accFound == NULL)
+    {
+        printf("Memory allocation failed!\n");
+        exit(1);
+    }
+    *count =0;
+    *accFound=0;
+    
     while (1)
     {
         printf("\n1: LOGIN\n0: QUIT\n");
@@ -481,15 +498,19 @@ void startmenu(void)
             if (login_result == 0)
             { // bro forgot his password :p
                 printf("UNAUTHORIZED USER SYSTEM WILL CLOSE\n");
+                free(accFound);
+                free(count);
                 exit(0);
             }
             if (login_result == 1)
             {
                 printf("USER CONFIRMED\n");
 
-                account *accounts=loadaccounts(&count);
+                account *accounts=loadaccounts(count);
                 
-                menu(accounts,count,&accFound);
+                menu(accounts,count,accFound);
+                free(accFound);
+                free(count);
                 free(accounts);
                 
                 break;
