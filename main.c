@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-=======
 #include "loadacc.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,4 +9,3 @@ int main(void)
     startmenu();
     return 0;
 }
->>>>>>> add_feature2
