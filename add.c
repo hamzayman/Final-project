@@ -1,153 +1,241 @@
+#include "add.h"
+#include "loadacc.h"
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
-int isDuplicateAccount(long long accNo){
-FILE *fp;
-long long fileAccNo;
-char line [200];
-fp= fopen("accounts.txt","r");
-if (fp==NULL) 
-return 0; 
-while (fgets(line,sizeof(line),fp)){
-   if(sscanf(line,"%lld", &fileAccNo)==1){
-    if (fileAccNo==accNo){
-        fclose(fp);
-        return 1;
+
+int isDuplicateAccount(account accounts[], int count, long long accNo)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (accounts[i].accountnumber == accNo)
+        {
+            return 1;  // Duplicate found
+        }
     }
+    return 0;  // No duplicate
 }
-}
-fclose(fp);
-return 0;
-}
-void addAccount(){
-    FILE *fp;
+void addAccount(account accounts[],int count)
+{
+   
+    if (accounts == NULL)
+    {
+        printf("Error loading accounts\n");
+        return;
+    }
+
     long long accNo;
     char name[50];
+    char address[100];
     float balance;
-    char date [11];
-    char status[]="active";
-    char email [100];
-    int phone;
+    char status[] = "active";
+    long long mobile;
+    int month, year;
+    
     SYSTEMTIME st;
     GetLocalTime(&st);
-    sprintf(date,"%02d-%02d-%04d",st.wDay,st.wMonth,st.wYear);
-    printf("Enter Account Number:");
-    scanf("%lld",&accNo);
-     while (getchar()!='\n');
-    if (isDuplicateAccount(accNo)){
-        printf("Error Account number already exists!\n");
+    month = st.wMonth;
+    year = st.wYear;
+    
+    printf("\n--- ADD NEW ACCOUNT ---\n");
+    printf("Enter Account Number: ");
+    scanf("%lld", &accNo);
+    while (getchar() != '\n');
+    
+    if (isDuplicateAccount(accounts, count, accNo))
+    {
+        printf("Error: Account number already exists!\n");
+        asktocontinue();
         return;
     }
-    printf("Enter Account Name:");
-     gets(name);
-     printf("Enter Initial Balance:");
-     scanf("%f",&balance);
-      while (getchar()!='\n');
-     printf("Enter phone number:");
-     scanf("%d",&phone);
-      while (getchar()!='\n');
-     printf("Enter the email:");
-     gets(email);
-     fp=fopen("accounts.txt","a");
-     if (fp==NULL){
-        printf("Error opening file!\n");
+    
+    printf("Enter Account Name: ");
+    fgets(name, sizeof(name), stdin);
+    name[strcspn(name, "\n")] = '\0';
+    
+    printf("Enter Initial Balance: ");
+    scanf("%f",&balance);
+    while (getchar() != '\n');
+    
+    printf("Enter Phone Number: ");
+    scanf("%lld", &mobile);
+    while (getchar() != '\n');
+    
+    printf("Enter Address: ");
+    fgets(address, sizeof(address), stdin);
+    address[strcspn(address, "\n")] = '\0';
+    
+    // Add new account to array
+    if (count >= 100) {
+        printf("Error: Maximum account limit reached!\n");
+        free(accounts);
+        asktocontinue();
         return;
-     }
-     fprintf(fp,"%lld,%s,%s,%.2f,%d,%s,%s\n",accNo,name,email,balance,phone,date,status);
-     fclose(fp);
-     printf("Account is added successfully on %s\n",date);
-
+    }
+    
+    accounts[count].accountnumber = accNo;
+    strcpy(accounts[count].name, name);
+    strcpy(accounts[count].address, address);
+    accounts[count].balance = balance;
+    accounts[count].mobile = mobile;
+    accounts[count].dateopened.month = month;
+    accounts[count].dateopened.year = year;
+    strcpy(accounts[count].status, status);
+    count++;
+    
+    printf("\nAccount added successfully on %d-%d\n", month, year);
+    
+    // Save to file
+    saveaccounts(accounts, count);    
+    // Ask to continue
+    asktocontinue();
 }
-typedef struct {
-    int accountNumber;
-    char name[50];
-    float balance;
-    char status[20];
-    char date[20];
-    char email[100];
-    int phone;
-} BankAccount;
-
-void deleteAccount() {
-    BankAccount accounts[100];
-    int count = 0;
-    FILE *fp;
-    int accToDelete;
+void deleteAccount(account accounts[], int count)
+{
+    if (accounts == NULL)
+    {
+        printf("Error: No accounts loaded\n");
+        return;
+    }
+    
+    if (count == 0)
+    {
+        printf("No accounts found in the system.\n");
+        return;
+    }
+    
+    long long accToDelete;
     int found = 0;
-    char line[300];
-    fp = fopen("accounts.txt", "r");
-    if (fp == NULL) {
-        printf("Error opening file!\n");
-        return;
-    }
-    while (fgets(line, sizeof(line), fp) != NULL) {
-        char *token;
-        token = strtok(line, ",");
-        if (token == NULL) continue;
-        accounts[count].accountNumber = atoi(token);
-        token = strtok(NULL, ",");
-        if (token == NULL) continue;
-        strncpy(accounts[count].name, token, sizeof(accounts[count].name));
-        accounts[count].name[sizeof(accounts[count].name)-1] = '\0';
-        token = strtok(NULL, ",");
-        if (token == NULL) continue;
-        strncpy(accounts[count].email, token, sizeof(accounts[count].email));
-        accounts[count].email[sizeof(accounts[count].email)-1] = '\0';
-        token = strtok(NULL, ",");
-        if (token == NULL) continue;
-        accounts[count].balance = atof(token);
-        token = strtok(NULL, ",");
-        if (token == NULL) continue;
-        accounts[count].phone = atoi(token);
-        token = strtok(NULL, ",");
-        if (token == NULL) continue;
-        strncpy(accounts[count].date, token, sizeof(accounts[count].date));
-        accounts[count].date[sizeof(accounts[count].date)-1] = '\0';
-        token = strtok(NULL, "\n");  
-        if (token == NULL) continue;
-        strncpy(accounts[count].status, token, sizeof(accounts[count].status));
-        accounts[count].status[sizeof(accounts[count].status)-1] = '\0';
-        count++;
-        if (count >= 100) break;
-    }
-    fclose(fp);
+    
+    printf("\n--- DELETE ACCOUNT ---\n");
     printf("Enter account number to delete: ");
-    scanf("%d", &accToDelete);
-    fp = fopen("accounts.txt", "w");
-    if (fp == NULL) {
-        printf("Error opening file!\n");
-        return;
-    }
-    for (int i = 0; i < count; i++) {
-        if (accounts[i].accountNumber == accToDelete) {
+    scanf("%lld", &accToDelete);
+    while (getchar() != '\n');
+    
+    for (int i = 0; i < count; i++)
+    {
+        if (accounts[i].accountnumber == accToDelete)
+        {
             found = 1;
-            if (accounts[i].balance > 0) {
+            
+            if (accounts[i].balance > 0.0)
+            {
                 printf("Deletion rejected, balance must be zero.\n");
-            } else {
+                printf("Current balance: %.2f\n", accounts[i].balance);
+                return;
+            }
+            else
+            {
+                // Shift all accounts after this one to the left
+                for (int j = i; j < count - 1; j++)
+                {
+                    accounts[j] = accounts[j + 1];
+                }
+                (count)--;  // Decrease the count
                 printf("Account deleted successfully.\n");
-                continue;  
+                break;
             }
         }
-        fprintf(fp,"%d,%s,%s,%.2f,%d,%s,%s\n",
-                accounts[i].accountNumber,
-                accounts[i].name,
-                accounts[i].email,
-                accounts[i].balance,
-                accounts[i].phone,
-                accounts[i].date,
-                accounts[i].status);
+    }
+    
+    if (!found)
+    {
+        printf("Error: Account number not found.\n");
+        return;
+    }
+    
+    // Save changes to file
+    saveaccounts(accounts, count);
+    asktocontinue();
+}
+void modifyAccount(account accounts[], int count)
+{
+    long long accnum;
+    int found = 0;
+    printf("input account number to modify\n");
+    scanf("%lld", &accnum);
+    for (int i = 0; i < count; i++)
+    {
+        if (accounts[i].accountnumber == accnum)
+        {
+            found = 1;
+            printf("\n----modifying account %lld----\n", accnum);
+            getchar(); // aashan takhod el enter ely dostaha baad ma katabt el acc number
+
+            printf("current name: %s\n", accounts[i].name);
+            printf("enter new name(or press enter to keep current name):\n");
+            char newname[100];
+            fgets(newname, sizeof(newname), stdin);
+            newname[strcspn(newname, "\n")] = '\0';
+            if (strlen(newname) > 0) // aashan law el user karar y-keep current name haydos enter fa ma3mlsh copy lel enter fi el name
+                strcpy(accounts[i].name, newname);
+
+            printf("current e-mail: %s\n", accounts[i].address);
+            printf("enter new e-mail(or press enter to keep current e-mail):\n");
+            char newEmail[100];
+            fgets(newEmail, sizeof(newEmail), stdin);
+            newEmail[strcspn(newEmail, "\n")] = '\0';
+            if (strlen(newEmail) > 0)
+                strcpy(accounts[i].address, newEmail);
+
+            printf("current mobile number: %lld\n", accounts[i].mobile);
+            printf("enter new mobile number(or press enter to keep current mobile number):\n");
+            char newMobile[30];
+            fgets(newMobile, sizeof(newMobile), stdin);
+            newMobile[strcspn(newMobile, "\n")] = '\0';
+            if (strlen(newMobile) > 0)
+                accounts[i].mobile = atoll(newMobile);
+            printf("\naccount is updated successfully\n");
+            break; // aashan el loop awel ma tela2y el acc number ely el user medakhloh tewa2af mato3odsh tedawar fi el ba2y
+        }
+    }
+    if (!found)
+        printf("couldn't find account %lld to be modified\n", accnum);
+        saveaccounts(accounts,count);
+    asktocontinue();
+}
+void changeStatus(account accounts[], int count)
+{
+    long long accNum;
+    int found = 0;
+    printf("\nenter account number to change status\n");
+    scanf("%lld", &accNum);
+    getchar();
+    for (int i = 0; i < count; i++)
+    {
+        if (accounts[i].accountnumber == accNum)
+        {
+            found = 1;
+            printf("\ncurrent status of your account %lld is %s\n", accNum, accounts[i].status);
+            printf("enter new status(active or inactive):\n");
+            char newStatus[20];
+            while (1)
+            {
+                fgets(newStatus, sizeof(newStatus), stdin);
+                newStatus[strcspn(newStatus, "\n")] = '\0';
+                if ((strcmp(newStatus, "active") == 0 || strcmp(newStatus, "inactive") == 0))
+                {
+                    break;
+                }
+                else
+                {
+                    printf("invalid input , try again.\n");
+                }
+            }
+            if (strcmp(newStatus, accounts[i].status) == 0)
+                printf("attention! the account already have the status of %s .no changes made\n", accounts[i].status);
+            else
+            {
+                strcpy(accounts[i].status, newStatus);
+                saveaccounts(accounts,count);
+                printf("account status updated successfully to %s\n", accounts[i].status);
+            }
+            break;
+        }
     }
 
-    if (!found) {
-        printf("Error: account number not found.\n");
-    }
-
-    fclose(fp);
+    if (!found)
+        printf("account number %lld is not found\n", accNum);
+    
+    asktocontinue();
 }
-int main(){
-    addAccount();
-    return 0;
-}
-
-
-
