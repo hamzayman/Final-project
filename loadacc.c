@@ -357,9 +357,23 @@ void menu(account accounts[], int *count, int *accFound)
         }
         else if (strcmp(select, "DELETE") == 0)
         {
-            printf("DELETE SELECTED , PROCCESSING\n");
-            // matensash t7ot el functioN
+            printf("DELETE SELECTED , PROCCESSING\n"); // matensash t7ot el functioN
+            printf("1 - MULTI-DELETE\n2 - DELETE");
+            int choice;
+            if (scanf("%d", &choice) != 1)
+            {
+                while (getchar() != '\n');
+                    
+                printf("Invalid input\n");
+                return;
+            }
+            while (getchar() != '\n');
+                
+            if (choice == 1){
+                multidelete(accounts,count);}
+            else if(choice ==2){
             deleteAccount(accounts, count);
+        }
             break;
         }
         else if (strcmp(select, "MODIFY") == 0)

@@ -148,9 +148,127 @@ void deleteAccount(account accounts[], int *count)
     saveaccounts(accounts,count);
     asktocontinue();
 }
-void multidelete(account accounts[],int *count,int *accfound){
+void multidelete(account accounts[], int *count)
+{
+    int choice;
+    int deleted = 0;
 
+    printf("\n--- MULTI DELETE ---\n");
+    printf("1 - Delete by date (YYYY/MM)\n");
+    printf("2 - Delete by status (inactive > 3 months & balance = 0)\n");
+    printf("Enter choice: ");
+
+    if (scanf("%d", &choice) != 1)
+    {
+        while (getchar() != '\n');
+        printf("Invalid input\n");
+        asktocontinue();
+        return;
+    }
+    while (getchar() != '\n');
+
+    if (choice == 1)
+    {
+        int year, month;
+        SYSTEMTIME st;
+        GetLocalTime(&st);
+
+        printf("Enter year: ");
+        if (scanf("%d", &year) != 1)
+        {
+            while (getchar() != '\n');
+            printf("Invalid year input\n");
+            asktocontinue();
+            return;
+        }
+
+        if (year < 1900 || year > st.wYear)
+        {
+            printf("Year out of valid range\n");
+            asktocontinue();
+            return;
+        }
+
+        printf("Enter month (1-12): ");
+        if (scanf("%d", &month) != 1)
+        {
+            while (getchar() != '\n');
+            printf("Invalid month input\n");
+            asktocontinue();
+            return;
+        }
+        while (getchar() != '\n');
+
+        if (month < 1 || month > 12)
+        {
+            printf("Invalid month (must be 1-12)\n");
+            asktocontinue();
+            return;
+        }
+
+        for (int i = 0; i < *count; )
+        {
+            if (accounts[i].dateopened.year == year &&
+                accounts[i].dateopened.month == month)
+            {
+                for (int j = i; j < *count - 1; j++)
+                    accounts[j] = accounts[j + 1];
+
+                (*count)--;
+                deleted++;
+            }
+            else
+            {
+                i++;
+            }
+        }
+    }
+
+    else if (choice == 2)
+    {
+        SYSTEMTIME st;
+        GetLocalTime(&st);
+
+        int currentMonth = st.wMonth;
+        int currentYear  = st.wYear;
+
+        for (int i = 0; i < *count; )
+        {
+            int monthsInactive =
+                (currentYear - accounts[i].dateopened.year) * 12 +
+                (currentMonth - accounts[i].dateopened.month);
+
+            if (accounts[i].balance == 0 &&
+                strcmp(accounts[i].status, "inactive") == 0 &&
+                monthsInactive > 3)
+            {
+                for (int j = i; j < *count - 1; j++)
+                    accounts[j] = accounts[j + 1];
+
+                (*count)--;
+                deleted++;
+            }
+            else
+            {
+                i++;
+            }
+        }
+    }
+    else
+    {
+        printf("Invalid choice\n");
+        asktocontinue();
+        return;
+    }
+
+    printf("\n%d account(s) deleted successfully.\n", deleted);
+
+    if (deleted > 0)
+        saveaccounts(accounts, count);
+
+    asktocontinue();
 }
+
 void modifyAccount(account accounts[], int *count)
 {
     long long accnum;
