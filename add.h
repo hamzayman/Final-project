@@ -8,5 +8,11 @@ int isDuplicateAccount(account accounts[], int *count, long long accNo);
 void addAccount(account accounts[], int *count);
 void deleteAccount(account accounts[], int *count);
 void multidelete(account accounts[], int *count);
+void deposit(account accounts[],int *count);
+int checkstring(char s[]);
+    int checkint(char s[]);
+    int valid_email(const char *email);
+
+
 
 #endif

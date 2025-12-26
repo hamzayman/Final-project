@@ -3,21 +3,22 @@
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
-
+#include <ctype.h>
+#define TRANSACTION_LIMIT 10000.0
 int isDuplicateAccount(account accounts[], int *count, long long accNo)
 {
     for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == accNo)
         {
-            return 1;  // Duplicate found
+            return 1; // Duplicate found
         }
     }
-    return 0;  // No duplicate
+    return 0; // No duplicate
 }
-void addAccount(account accounts[],int *count)
+void addAccount(account accounts[], int *count)
 {
-   
+
     if (accounts == NULL)
     {
         printf("Error loading accounts\n");
@@ -31,48 +32,119 @@ void addAccount(account accounts[],int *count)
     char status[] = "active";
     long long mobile;
     int month, year;
-    
+    int flag = 0;
+    char temp[100];
+
     SYSTEMTIME st;
     GetLocalTime(&st);
     month = st.wMonth;
     year = st.wYear;
-    
+
     printf("\n--- ADD NEW ACCOUNT ---\n");
     printf("Enter Account Number: ");
-    scanf("%lld", &accNo);
-    while (getchar() != '\n');
-    
-    if (isDuplicateAccount(accounts, count, accNo))
+    fgets(temp, sizeof(temp), stdin);
+    temp[strcspn(temp, "\n")] = '\0';
+    if (!checkint(temp))
     {
-        printf("Error: Account number already exists!\n");
+        printf("Invalid input \n");
         asktocontinue();
         return;
     }
-    
+     if (strlen(temp) == sizeof(temp) - 1)
+    {
+        printf("Invalid input \n");
+        while (getchar() != '\n');
+        asktocontinue();
+        return;
+    }
+    accNo = atoll(temp);
+
+    if (isDuplicateAccount(accounts, count, accNo))
+    {
+        printf("Error: Account number already exists!\n");
+
+        asktocontinue();
+        return;
+    }
+
     printf("Enter Account Name: ");
     fgets(name, sizeof(name), stdin);
     name[strcspn(name, "\n")] = '\0';
-    
+    if (!checkstring(name))
+    {
+        printf("invalid input");\
+        asktocontinue();
+        return;
+    }
+    if (strlen(name) == sizeof(name) - 1)
+    {
+        printf("invalid input");\
+        while (getchar() != '\n');
+        asktocontinue();
+        return;
+    }
+
     printf("Enter Initial Balance: ");
-    scanf("%f",&balance);
-    while (getchar() != '\n');
-    
+    fgets(temp, sizeof(temp), stdin);
+    temp[strcspn(temp, "\n")] = '\0';
+    if (!checkint(temp))
+    {
+        printf("invalid input");
+        asktocontinue();
+        return;
+    }
+
+        if (strlen(temp) == sizeof(temp) - 1)
+    {
+        printf("invalid input");
+        while (getchar() != '\n');
+        asktocontinue();
+        return;
+    }
+    balance = atof(temp);
+
     printf("Enter Phone Number: ");
-    scanf("%lld", &mobile);
-    while (getchar() != '\n');
-    
+    fgets(temp, sizeof(temp), stdin);
+    temp[strcspn(temp, "\n")] = '\0';
+    if (!checkint(temp))
+    {
+        printf("invalid input");
+        asktocontinue();
+        return;
+    }
+    if (strlen(temp) == sizeof(temp) - 1)
+    {
+        printf("invalid input");
+        while (getchar() != '\n');
+        asktocontinue();
+        return;
+    }
+    mobile = atoll(temp);
     printf("Enter Address: ");
     fgets(address, sizeof(address), stdin);
     address[strcspn(address, "\n")] = '\0';
-    
+    if (!valid_email(address))
+    {
+        printf("invalid input");
+        asktocontinue();
+        return;
+    }
+    if (strlen(address) == sizeof(address) - 1)
+    {
+        printf("invalid input");
+        while (getchar() != '\n');
+        asktocontinue();
+        return;
+    }
     // Add new account to array
-    if (*count >= 100) {
+    if (*count >= 100)
+    {
         printf("Error: Maximum account limit reached!\n");
         free(accounts);
         asktocontinue();
         return;
     }
-    
+
     accounts[*count].accountnumber = accNo;
     strcpy(accounts[*count].name, name);
     strcpy(accounts[*count].address, address);
@@ -81,12 +153,12 @@ void addAccount(account accounts[],int *count)
     accounts[*count].dateopened.month = month;
     accounts[*count].dateopened.year = year;
     strcpy(accounts[*count].status, status);
-    *count++;
-    
+    (*count)++;
+
     printf("\nAccount added successfully on %d-%d\n", month, year);
-    
+
     // Save to file
-    saveaccounts(accounts, count);    
+    saveaccounts(accounts, count);
     // Ask to continue
     asktocontinue();
 }
@@ -97,27 +169,28 @@ void deleteAccount(account accounts[], int *count)
         printf("Error: No accounts loaded\n");
         return;
     }
-    
+
     if (*count == 0)
     {
         printf("No accounts found in the system.\n");
         return;
     }
-    
+
     long long accToDelete;
     int found = 0;
-    
+
     printf("\n--- DELETE ACCOUNT ---\n");
     printf("Enter account number to delete: ");
     scanf("%lld", &accToDelete);
-    while (getchar() != '\n');
-    
+    while (getchar() != '\n')
+        ;
+
     for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == accToDelete)
         {
             found = 1;
-            
+
             if (accounts[i].balance > 0.0)
             {
                 printf("Deletion rejected, balance must be zero.\n");
@@ -131,21 +204,21 @@ void deleteAccount(account accounts[], int *count)
                 {
                     accounts[j] = accounts[j + 1];
                 }
-                (*count)--;  // Decrease the *count
+                (*count)--; // Decrease the *count
                 printf("Account deleted successfully.\n");
                 break;
             }
         }
     }
-    
+
     if (!found)
     {
         printf("Error: Account number not found.\n");
         return;
     }
-    
+
     // Save changes to file
-    saveaccounts(accounts,count);
+    saveaccounts(accounts, count);
     asktocontinue();
 }
 void multidelete(account accounts[], int *count)
@@ -160,12 +233,14 @@ void multidelete(account accounts[], int *count)
 
     if (scanf("%d", &choice) != 1)
     {
-        while (getchar() != '\n');
+        while (getchar() != '\n')
+            ;
         printf("Invalid input\n");
         asktocontinue();
         return;
     }
-    while (getchar() != '\n');
+    while (getchar() != '\n')
+        ;
 
     if (choice == 1)
     {
@@ -176,7 +251,8 @@ void multidelete(account accounts[], int *count)
         printf("Enter year: ");
         if (scanf("%d", &year) != 1)
         {
-            while (getchar() != '\n');
+            while (getchar() != '\n')
+                ;
             printf("Invalid year input\n");
             asktocontinue();
             return;
@@ -192,12 +268,14 @@ void multidelete(account accounts[], int *count)
         printf("Enter month (1-12): ");
         if (scanf("%d", &month) != 1)
         {
-            while (getchar() != '\n');
+            while (getchar() != '\n')
+                ;
             printf("Invalid month input\n");
             asktocontinue();
             return;
         }
-        while (getchar() != '\n');
+        while (getchar() != '\n')
+            ;
 
         if (month < 1 || month > 12)
         {
@@ -206,7 +284,7 @@ void multidelete(account accounts[], int *count)
             return;
         }
 
-        for (int i = 0; i < *count; )
+        for (int i = 0; i < *count;)
         {
             if (accounts[i].dateopened.year == year &&
                 accounts[i].dateopened.month == month)
@@ -230,9 +308,9 @@ void multidelete(account accounts[], int *count)
         GetLocalTime(&st);
 
         int currentMonth = st.wMonth;
-        int currentYear  = st.wYear;
+        int currentYear = st.wYear;
 
-        for (int i = 0; i < *count; )
+        for (int i = 0; i < *count;)
         {
             int monthsInactive =
                 (currentYear - accounts[i].dateopened.year) * 12 +
@@ -312,7 +390,7 @@ void modifyAccount(account accounts[], int *count)
     }
     if (!found)
         printf("couldn't find account %lld to be modified\n", accnum);
-        saveaccounts(accounts,count);
+    saveaccounts(accounts, count);
     asktocontinue();
 }
 void changeStatus(account accounts[], int *count)
@@ -348,7 +426,7 @@ void changeStatus(account accounts[], int *count)
             else
             {
                 strcpy(accounts[i].status, newStatus);
-                saveaccounts(accounts,count);
+                saveaccounts(accounts, count);
                 printf("account status updated successfully to %s\n", accounts[i].status);
             }
             break;
@@ -357,6 +435,97 @@ void changeStatus(account accounts[], int *count)
 
     if (!found)
         printf("account number %lld is not found\n", accNum);
-    
+
     asktocontinue();
+}
+void deposit(account accounts[], int *count)
+{
+    int num = *count;
+    long long accNum;
+    float amount;
+    int found = 0;
+    char filename[50];
+    printf("\nenter the account number\n");
+    scanf("%lld", &accNum);
+    for (int i = 0; i < num; i++)
+    {
+        if (accounts[i].accountnumber == accNum)
+        {
+            found = 1;
+            if (strcmp(accounts[i].status, "active") != 0)
+            {
+                printf("\nwarning!! the account status is inactive,transaction cannot be done");
+                return;
+            }
+            printf("\nenter the amount you want to deposit");
+            scanf("%f", &amount);
+            if (amount > TRANSACTION_LIMIT)
+            {
+                printf("\nmax deposit per transaction is %.2f ,transaction cannot be done\n", TRANSACTION_LIMIT);
+                return;
+            }
+            if (amount <= 0)
+            {
+                printf("invalid amount");
+                return;
+            }
+            accounts[i].balance = accounts[i].balance + amount;
+            sprintf(filename, "%lld.txt", accounts[i].accountnumber);
+            FILE *fp = fopen(filename, "a");
+            if (fp != NULL)
+            {
+                fprintf(fp, "\ndeposit %.2f\n", amount);
+                fclose(fp);
+            }
+            else
+            {
+                printf("\nerror in opening transaction file\n");
+                return;
+            }
+            printf("\n---deposit completed successfully---\n");
+            printf("current balance is: %.2f", accounts[i].balance);
+            return;
+        }
+    }
+    if (!found)
+    {
+        printf("\naccount number cannot be found");
+        asktocontinue();
+    }
+}
+int valid_email(const char *email)
+{
+    if (!email)
+        return 0;
+
+    // Just check for @ and . in reasonable positions
+    char *at = strchr(email, '@');
+    if (!at || at == email)
+        return 0; // No @ or @ at start
+
+    char *dot = strchr(at + 1, '.');
+    if (!dot || dot[1] == '\0')
+        return 0; // No . or . at end
+
+    return 1; // Good enough for bank system!
+}
+int checkint(char s[])
+{
+
+    for (int i = 0; s[i]; i++)
+    {
+        if (!isdigit(s[i]))
+            return 0;
+    }
+    return 1;
+}
+int checkstring(char s[])
+{
+
+    for (int i = 0; s[i]; i++)
+    {
+        if (!isalpha(s[i]) && s[i] != ' ')
+            return 0;
+    }
+    return 1;
 }

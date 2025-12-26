@@ -31,6 +31,11 @@ account *loadaccounts(int *count)
         if (token == NULL)
             continue;
         accounts[*count].accountnumber = atoll(token); // el atoi bethawel mn string le long long
+        char filename[50];
+        sprintf(filename,"%lld.txt",accounts[*count].accountnumber);
+        FILE *tfp=fopen(filename,"a");
+        if(tfp!=NULL)
+            fclose(tfp);
         token = strtok(NULL, ",");
         strcpy(accounts[*count].name, token);
 
@@ -252,8 +257,7 @@ void asktocontinue()
     }
     *count = 0;
     *accFound = 0;
-    while (getchar() != '\n')
-        ;
+    
     printf("Do you want to do any other operations ? :(Y/N)\n");
     while (1)
     {
@@ -335,11 +339,11 @@ void saveaccounts(account accounts[], int *count)
         }
     }
 }
-void menu(account accounts[], int *count, int *accFound)
+void 
+menu(account accounts[], int *count, int *accFound)
 {
     char select[100];
     printf("- ADD\n- DELETE \n- MODIFY\n- SEARCH\n- ADVANCED SEARCH\n- CHANGE STATUS\n- WITHDRAW\n- DEPOSIT\n- TRANSFER\n- REPORT\n- PRINT\n- QUIT\n");
-    fflush(stdout);
     while (1)
     {
         if (!fgets(select, sizeof(select), stdin))
@@ -408,6 +412,7 @@ void menu(account accounts[], int *count, int *accFound)
         else if (strcmp(select, "DEPOSIT") == 0)
         {
             printf("DEPOSIT SELECTED , PROCCESSING\n"); // matensash t7ot el function
+            deposit(accounts,count);
             break;
         }
         else if (strcmp(select, "TRANSFER") == 0)
@@ -443,30 +448,62 @@ int login()
 
     FILE *fp;
     char f_user[50], f_pass[50], in_user[50], in_pass[50];
-    printf("Enter username :\n");
-    fgets(in_user, sizeof(in_user), stdin);
-    in_user[strcspn(in_user, "\n")] = '\0';
-    printf("Enter password :\n");
-    fgets(in_pass, sizeof(in_pass), stdin);
-    in_pass[strcspn(in_pass, "\n")] = '\0';
+    while (1)
+    {
+        printf("Enter username:\n");
 
-    fp = fopen("users.txt", "r"); // 3ayez a read el data
+        if (!fgets(in_user, sizeof(in_user), stdin))
+            return 0;
+
+        if (strchr(in_user, '\n') == NULL)
+        {
+            printf("username too long\n");
+            clearbuffer();   // consume remaining chars
+            continue;
+        }
+
+        in_user[strcspn(in_user, "\n")] = '\0';
+        break;
+    }
+
+    while (1)
+    {
+        printf("Enter password:\n");
+
+        if (!fgets(in_pass, sizeof(in_pass), stdin))
+            return 0;
+
+        if (strchr(in_pass, '\n') == NULL)
+        {
+            printf("password too long\n");
+            clearbuffer();
+            continue;
+        }
+
+        in_pass[strcspn(in_pass, "\n")] = '\0';
+        break;
+    }
+
+    fp = fopen("users.txt", "r");
     if (fp == NULL)
     {
-        printf("error occured "); // law el file hasal error
+        printf("error occurred\n");
         return 0;
     }
+
     while (fscanf(fp, "%49s %49s", f_user, f_pass) == 2)
-    { // ==2 yaany while it reads ONLY 2 words
-        if (strcmp(in_user, f_user) == 0 && strcmp(in_pass, f_pass) == 0)
-        { // input = data
+    {
+        if (strcmp(in_user, f_user) == 0 &&
+            strcmp(in_pass, f_pass) == 0)
+        {
             fclose(fp);
-            printf("login successfull\n");
-            return 1; // login success
+            printf("login successful\n");
+            return 1;
         }
     }
+
     fclose(fp);
-    return 0; // login failed
+    return 0;
 }
 
 void startmenu(void)
@@ -534,4 +571,8 @@ void startmenu(void)
             printf("Invalid\n");
         }
     }
+}
+void clearbuffer(){
+    int c;
+while ((c = getchar()) != '\n' && c != EOF);
 }

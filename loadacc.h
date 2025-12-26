@@ -11,6 +11,7 @@ void asktocontinue(void);
 
 account *loadaccounts(int *count);
 void saveaccounts(account accounts[], int *count);
+void clearbuffer();
 
 
 void printAccounts(account accounts[], int *count);
