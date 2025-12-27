@@ -5,7 +5,7 @@
 #include "add.h"
 
 void startmenu(void);
-void menu(account accounts[], int *count, int *accFound);
+void menu(account accounts[], int *count);
 void asktocontinue(void);
 
 
@@ -15,9 +15,10 @@ void clearbuffer();
 
 
 void printAccounts(account accounts[], int *count);
-void querySearch(account accounts[], int *count, int *accFound);
-void advancedSearch(account accounts[], int *count, int *accFound);
+void querySearch(account accounts[], int *count);
+void advancedSearch(account accounts[], int *count);
 void modifyAccount(account accounts[], int *count);
 void changeStatus(account accounts[], int *count);
+void report(account accounts[],int *count);
 
 #endif

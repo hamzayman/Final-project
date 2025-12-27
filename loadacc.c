@@ -32,9 +32,9 @@ account *loadaccounts(int *count)
             continue;
         accounts[*count].accountnumber = atoll(token); // el atoi bethawel mn string le long long
         char filename[50];
-        sprintf(filename,"%lld.txt",accounts[*count].accountnumber);
-        FILE *tfp=fopen(filename,"a");
-        if(tfp!=NULL)
+        sprintf(filename, "%lld.txt", accounts[*count].accountnumber);
+        FILE *tfp = fopen(filename, "a");
+        if (tfp != NULL)
             fclose(tfp);
         token = strtok(NULL, ",");
         strcpy(accounts[*count].name, token);
@@ -187,13 +187,18 @@ const char *getMonthName(int month)
         return "Invalid month";
     }
 }
-void querySearch(account accounts[], int *count, int *accFound)
+void querySearch(account accounts[], int *count)
 {
     long long searchnumber;
     int found = 0;
     printf("input account number to search\n");
-    scanf("%lld", &searchnumber);
-    getchar();
+    if (scanf("%lld", &searchnumber) != 1)
+    {
+        printf("invalid input\n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
     for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == searchnumber)
@@ -206,26 +211,44 @@ void querySearch(account accounts[], int *count, int *accFound)
             printf("date opened: %s %d\n", getMonthName(accounts[i].dateopened.month), accounts[i].dateopened.year);
             printf("status: %s\n", accounts[i].status);
             found = 1;
-            (*accFound)++;
             break;
         }
     }
     if (!found)
         printf("\n account not found\n");
+    clearbuffer();
     asktocontinue();
 }
-void advancedSearch(account accounts[], int *count, int *accFound)
+void advancedSearch(account accounts[], int *count)
 {
     char keyword[100];
     int found = 0;
-    *accFound = 0;
     printf("input keyword: ");
-    getchar();
     fgets(keyword, sizeof(keyword), stdin);
+    if (strchr(keyword, '\n') == NULL)
+    {
+        printf("Invalid input\n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
     keyword[strcspn(keyword, "\n")] = '\0';
+
     for (int i = 0; i < *count; i++)
     {
-        if (strstr(accounts[i].name, keyword) != NULL)
+        char accStr[50], mobileStr[50], balanceStr[50], dateStr[50];
+
+        sprintf(accStr, "%lld", accounts[i].accountnumber);
+        sprintf(mobileStr, "%lld", accounts[i].mobile);
+        sprintf(balanceStr, "%.2f", accounts[i].balance);
+        sprintf(dateStr, "%d-%d", accounts[i].dateopened.month, accounts[i].dateopened.year);
+        if (strstr(accounts[i].name, keyword) != NULL ||
+            strstr(accounts[i].address, keyword) != NULL ||
+            strstr(accounts[i].status, keyword) != NULL ||
+            strstr(accStr, keyword) != NULL ||
+            strstr(mobileStr, keyword) != NULL ||
+            strstr(balanceStr, keyword) != NULL ||
+            strstr(dateStr, keyword) != NULL)
         {
             printf("\naccount number: %lld\n", accounts[i].accountnumber);
             printf("name: %s\n", accounts[i].name);
@@ -233,14 +256,16 @@ void advancedSearch(account accounts[], int *count, int *accFound)
             printf("balance: %f\n", accounts[i].balance);
             printf("mobile: %lld\n", accounts[i].mobile);
             printf("date opened: %s %d\n", getMonthName(accounts[i].dateopened.month), accounts[i].dateopened.year);
-            printf("status: %s\n\n\n\n", accounts[i].status);
+            printf("status: %s\n", accounts[i].status);
             found = 1;
-            (*accFound)++;
         }
     }
 
-    if (!found)
+    if (!found){
         printf("\nthe keyword is not found in any account\n");
+            asktocontinue();
+            return;
+    }
     asktocontinue();
 }
 
@@ -257,7 +282,7 @@ void asktocontinue()
     }
     *count = 0;
     *accFound = 0;
-    
+
     printf("Do you want to do any other operations ? :(Y/N)\n");
     while (1)
     {
@@ -270,7 +295,7 @@ void asktocontinue()
         if (strcmp(input, "y") == 0 || strcmp(input, "Y") == 0)
         {
             account *accounts = loadaccounts(count);
-            menu(accounts, count, accFound);
+            menu(accounts, count);
             free(count);
             free(accFound);
             free(accounts);
@@ -339,10 +364,9 @@ void saveaccounts(account accounts[], int *count)
         }
     }
 }
-void 
-menu(account accounts[], int *count, int *accFound)
+void menu(account accounts[], int *count)
 {
-    char select[100];
+    char select[1000];
     printf("- ADD\n- DELETE \n- MODIFY\n- SEARCH\n- ADVANCED SEARCH\n- CHANGE STATUS\n- WITHDRAW\n- DEPOSIT\n- TRANSFER\n- REPORT\n- PRINT\n- QUIT\n");
     while (1)
     {
@@ -353,86 +377,94 @@ menu(account accounts[], int *count, int *accFound)
         }
 
         select[strcspn(select, "\n")] = '\0';
-        if (strcmp(select, "ADD") == 0)
+        if (stricmp(select, "ADD") == 0)
         {
             printf("ADD SELECTED , PROCCESSING\n"); // matensash t7ot el function
             addAccount(accounts, count);
             break;
         }
-        else if (strcmp(select, "DELETE") == 0)
+        else if (stricmp(select, "DELETE") == 0)
         {
             printf("DELETE SELECTED , PROCCESSING\n"); // matensash t7ot el functioN
             printf("1 - MULTI-DELETE\n2 - DELETE");
             int choice;
             if (scanf("%d", &choice) != 1)
             {
-                while (getchar() != '\n');
-                    
+                while (getchar() != '\n')
+                    ;
+
                 printf("Invalid input\n");
                 return;
             }
-            while (getchar() != '\n');
-                
-            if (choice == 1){
-                multidelete(accounts,count);}
-            else if(choice ==2){
-            deleteAccount(accounts, count);
-        }
+            while (getchar() != '\n')
+                ;
+
+            if (choice == 1)
+            {
+                multidelete(accounts, count);
+            }
+            else if (choice == 2)
+            {
+                deleteAccount(accounts, count);
+            }
             break;
         }
-        else if (strcmp(select, "MODIFY") == 0)
+        else if (stricmp(select, "MODIFY") == 0)
         {
             printf("MODIFY SELECTED , PROCCESSING\n"); // matensash t7ot el function
             modifyAccount(accounts, count);
             break;
         }
-        else if (strcmp(select, "SEARCH") == 0)
+        else if (stricmp(select, "SEARCH") == 0)
         {
             printf("SEARCH SELECTED , PROCCESSING\n"); // matensash t7ot el function
-            querySearch(accounts, count, accFound);
+            querySearch(accounts, count);
             break;
         }
-        else if (strcmp(select, "ADVANCED SEARCH") == 0)
+        else if (stricmp(select, "ADVANCED SEARCH") == 0)
         {
             printf("ADVANCED SEARCH , PROCCESSING\n"); // matensash t7ot el function
-            advancedSearch(accounts, count, accFound);
+            advancedSearch(accounts, count);
             break;
         }
-        else if (strcmp(select, "CHANGE STATUS") == 0)
+        else if (stricmp(select, "CHANGE STATUS") == 0)
         {
             printf("CHANGE_STATUS , PROCCESSING\n"); // matensash t7ot el function
             changeStatus(accounts, count);
             break;
         }
-        else if (strcmp(select, "WITHDRAW") == 0)
+        else if (stricmp(select, "WITHDRAW") == 0)
         {
             printf("WITHDRAW SELECTED , PROCCESSING\n"); // matensash t7ot el function
+            withDraw(accounts, count);
             break;
         }
-        else if (strcmp(select, "DEPOSIT") == 0)
+        else if (stricmp(select, "DEPOSIT") == 0)
         {
             printf("DEPOSIT SELECTED , PROCCESSING\n"); // matensash t7ot el function
-            deposit(accounts,count);
+            deposit(accounts, count);
             break;
         }
-        else if (strcmp(select, "TRANSFER") == 0)
+        else if (stricmp(select, "TRANSFER") == 0)
         {
             printf("TRANSFER SELECTED , PROCCESSING\n"); // matensash t7ot el function
+            transfer(accounts,count);
             break;
         }
-        else if (strcmp(select, "REPORT") == 0)
+        else if (stricmp(select, "REPORT") == 0)
         {
             printf("REPORT SELECTED , PROCCESSING\n"); // matensash t7ot el function
+            report(accounts, count);
             break;
         }
-        else if (strcmp(select, "QUIT") == 0)
+        else if (stricmp(select, "QUIT") == 0)
         {
             printf("QUIT SELECTED , PROCCESSING\n"); // matensash t7ot el function
             printf("Thank you!\nQUITTING.\n");
             exit(0);
             break;
         }
-        else if (strcmp(select, "PRINT") == 0)
+        else if (stricmp(select, "PRINT") == 0)
         {
             printf("PRINT SELECTED , PROCCESSING\n"); // matensash t7ot el function
             printAccounts(accounts, count);
@@ -458,7 +490,7 @@ int login()
         if (strchr(in_user, '\n') == NULL)
         {
             printf("username too long\n");
-            clearbuffer();   // consume remaining chars
+            clearbuffer(); // consume remaining chars
             continue;
         }
 
@@ -511,15 +543,13 @@ void startmenu(void)
     int x;
     int result;
     int *count = malloc(sizeof(int));
-    int *accFound = malloc(sizeof(int));
 
-    if (count == NULL || accFound == NULL)
+    if (count == NULL)
     {
         printf("Memory allocation failed!\n");
         exit(1);
     }
     *count = 0;
-    *accFound = 0;
 
     while (1)
     {
@@ -548,7 +578,6 @@ void startmenu(void)
             if (login_result == 0)
             { // bro forgot his password :p
                 printf("UNAUTHORIZED USER SYSTEM WILL CLOSE\n");
-                free(accFound);
                 free(count);
                 exit(0);
             }
@@ -558,8 +587,7 @@ void startmenu(void)
 
                 account *accounts = loadaccounts(count);
 
-                menu(accounts, count, accFound);
-                free(accFound);
+                menu(accounts, count);
                 free(count);
                 free(accounts);
 
@@ -572,7 +600,75 @@ void startmenu(void)
         }
     }
 }
-void clearbuffer(){
+void clearbuffer()
+{
     int c;
-while ((c = getchar()) != '\n' && c != EOF);
+    while ((c = getchar()) != '\n' && c != EOF)
+        ;
+}
+
+void report(account accounts[], int *count)
+{
+    int num = *count;
+    long long accNum;
+    char filename[50];
+    int found = 0;
+    char transactions[100][200];
+    int lineCount = 0;
+    printf("enter your account number");
+    if (scanf("%lld", &accNum) != 1)
+    {
+        printf("invalid input \n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
+    for (int i = 0; i < num; i++)
+    {
+        if (accounts[i].accountnumber == accNum)
+        {
+            found = 1;
+            break;
+        }
+    }
+    if (!found)
+    {
+        printf("account number doesn't exist\n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
+    sprintf(filename, "%lld.txt", accNum);
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL)
+    {
+        printf("no transaction history found");
+        asktocontinue();
+        return;
+    }
+    while (fgets(transactions[lineCount], sizeof(transactions[lineCount]), fp))
+    {
+        if (transactions[lineCount][0] == '\n')
+            continue;
+
+        lineCount++;
+    }
+    fclose(fp);
+    if (lineCount == 0)
+    {
+        printf("no transactions found");
+        asktocontinue();
+        return;
+    }
+    printf("\n----last transactions in account number %lld----\n", accNum);
+    int start = lineCount - 5;
+    if (start < 0)
+        start = 0;
+    for (int j = start; j < lineCount; j++)
+    {
+        printf("%s\n", transactions[j]);
+    }
+    clearbuffer();
+    asktocontinue();
+    return;
 }

@@ -10,8 +10,11 @@ void deleteAccount(account accounts[], int *count);
 void multidelete(account accounts[], int *count);
 void deposit(account accounts[],int *count);
 int checkstring(char s[]);
-    int checkint(char s[]);
-    int valid_email(const char *email);
+int checkint(char s[]);
+int valid_email(const char *email);
+int dailylimit(long long accNum,float newAmount);
+void withDraw(account accounts[],int* count);
+void transfer(account accounts[],int *count);
 
 
 

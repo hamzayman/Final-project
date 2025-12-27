@@ -5,6 +5,8 @@
 #include <string.h>
 #include <ctype.h>
 #define TRANSACTION_LIMIT 10000.0
+#define DAILY_LIMIT 50000.0
+
 int isDuplicateAccount(account accounts[], int *count, long long accNo)
 {
     for (int i = 0; i < *count; i++)
@@ -47,13 +49,14 @@ void addAccount(account accounts[], int *count)
     if (!checkint(temp))
     {
         printf("Invalid input \n");
+        clearbuffer();
         asktocontinue();
         return;
     }
-     if (strlen(temp) == sizeof(temp) - 1)
+    if (strlen(temp) == sizeof(temp) - 1)
     {
         printf("Invalid input \n");
-        while (getchar() != '\n');
+        clearbuffer();
         asktocontinue();
         return;
     }
@@ -72,14 +75,15 @@ void addAccount(account accounts[], int *count)
     name[strcspn(name, "\n")] = '\0';
     if (!checkstring(name))
     {
-        printf("invalid input");\
+        printf("invalid input\n");
         asktocontinue();
         return;
     }
     if (strlen(name) == sizeof(name) - 1)
     {
-        printf("invalid input");\
-        while (getchar() != '\n');
+        printf("invalid input\n");
+        while (getchar() != '\n')
+            ;
         asktocontinue();
         return;
     }
@@ -89,15 +93,16 @@ void addAccount(account accounts[], int *count)
     temp[strcspn(temp, "\n")] = '\0';
     if (!checkint(temp))
     {
-        printf("invalid input");
+        printf("invalid input\n");
         asktocontinue();
         return;
     }
 
-        if (strlen(temp) == sizeof(temp) - 1)
+    if (strlen(temp) == sizeof(temp) - 1)
     {
-        printf("invalid input");
-        while (getchar() != '\n');
+        printf("invalid input\n");
+        while (getchar() != '\n')
+            ;
         asktocontinue();
         return;
     }
@@ -108,14 +113,15 @@ void addAccount(account accounts[], int *count)
     temp[strcspn(temp, "\n")] = '\0';
     if (!checkint(temp))
     {
-        printf("invalid input");
+        printf("invalid input\n");
         asktocontinue();
         return;
     }
     if (strlen(temp) == sizeof(temp) - 1)
     {
-        printf("invalid input");
-        while (getchar() != '\n');
+        printf("invalid input\n");
+        while (getchar() != '\n')
+            ;
         asktocontinue();
         return;
     }
@@ -125,14 +131,15 @@ void addAccount(account accounts[], int *count)
     address[strcspn(address, "\n")] = '\0';
     if (!valid_email(address))
     {
-        printf("invalid input");
+        printf("invalid input\n");
         asktocontinue();
         return;
     }
     if (strlen(address) == sizeof(address) - 1)
     {
-        printf("invalid input");
-        while (getchar() != '\n');
+        printf("invalid input\n");
+        while (getchar() != '\n')
+            ;
         asktocontinue();
         return;
     }
@@ -178,13 +185,29 @@ void deleteAccount(account accounts[], int *count)
 
     long long accToDelete;
     int found = 0;
+    char temp[50];
 
     printf("\n--- DELETE ACCOUNT ---\n");
     printf("Enter account number to delete: ");
-    scanf("%lld", &accToDelete);
-    while (getchar() != '\n')
-        ;
+    fgets(temp, sizeof(temp), stdin);
 
+    if (strchr(temp, '\n') == NULL)
+    {
+        printf("Invalid input\n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
+    temp[strcspn(temp, "\n")] = '\0';
+
+    if (!checkint(temp))
+    {
+        printf("Invalid input \n");
+        asktocontinue();
+        return;
+    }
+
+    accToDelete = atoll(temp);
     for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == accToDelete)
@@ -195,6 +218,7 @@ void deleteAccount(account accounts[], int *count)
             {
                 printf("Deletion rejected, balance must be zero.\n");
                 printf("Current balance: %.2f\n", accounts[i].balance);
+                asktocontinue();
                 return;
             }
             else
@@ -206,6 +230,8 @@ void deleteAccount(account accounts[], int *count)
                 }
                 (*count)--; // Decrease the *count
                 printf("Account deleted successfully.\n");
+                saveaccounts(accounts, count);
+                asktocontinue();
                 break;
             }
         }
@@ -287,7 +313,7 @@ void multidelete(account accounts[], int *count)
         for (int i = 0; i < *count;)
         {
             if (accounts[i].dateopened.year == year &&
-                accounts[i].dateopened.month == month)
+                accounts[i].dateopened.month == month && accounts[i].balance == 0)
             {
                 for (int j = i; j < *count - 1; j++)
                     accounts[j] = accounts[j + 1];
@@ -335,14 +361,20 @@ void multidelete(account accounts[], int *count)
     else
     {
         printf("Invalid choice\n");
+        clearbuffer();
         asktocontinue();
         return;
     }
 
-    printf("\n%d account(s) deleted successfully.\n", deleted);
-
     if (deleted > 0)
+    {
         saveaccounts(accounts, count);
+        printf("\n%d account(s) deleted successfully.\n", deleted);
+    }
+    else
+    {
+        printf("no accounts deleted\n");
+    }
 
     asktocontinue();
 }
@@ -390,16 +422,40 @@ void modifyAccount(account accounts[], int *count)
     }
     if (!found)
         printf("couldn't find account %lld to be modified\n", accnum);
-    saveaccounts(accounts, count);
     asktocontinue();
 }
 void changeStatus(account accounts[], int *count)
 {
+    char temp[100];
     long long accNum;
     int found = 0;
     printf("\nenter account number to change status\n");
-    scanf("%lld", &accNum);
-    getchar();
+    fgets(temp, sizeof(temp), stdin);
+
+    if (strchr(temp, '\n') == NULL)
+    {
+        printf("Invalid input\n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
+    temp[strcspn(temp, "\n")] = '\0';
+
+    if (!checkint(temp))
+    {
+        printf("Invalid input \n");
+        asktocontinue();
+        return;
+    }
+    if (strlen(temp) == sizeof(temp) - 1)
+    {
+        printf("Invalid input \n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
+    accNum = atoll(temp);
+
     for (int i = 0; i < *count; i++)
     {
         if (accounts[i].accountnumber == accNum)
@@ -411,7 +467,29 @@ void changeStatus(account accounts[], int *count)
             while (1)
             {
                 fgets(newStatus, sizeof(newStatus), stdin);
+
+                if (strchr(newStatus, '\n') == NULL)
+                {
+                    printf("Invalid input\n");
+                    clearbuffer();
+                    asktocontinue();
+                    return;
+                }
                 newStatus[strcspn(newStatus, "\n")] = '\0';
+
+                if (!checkstring(newStatus))
+                {
+                    printf("Invalid input \n");
+                    asktocontinue();
+                    return;
+                }
+                if (strlen(newStatus) == sizeof(newStatus) - 1)
+                {
+                    printf("Invalid input \n");
+                    clearbuffer();
+                    asktocontinue();
+                    return;
+                }
                 if ((strcmp(newStatus, "active") == 0 || strcmp(newStatus, "inactive") == 0))
                 {
                     break;
@@ -446,7 +524,13 @@ void deposit(account accounts[], int *count)
     int found = 0;
     char filename[50];
     printf("\nenter the account number\n");
-    scanf("%lld", &accNum);
+    if (scanf("%lld", &accNum) != 1)
+    {
+        printf("invalid input\n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
     for (int i = 0; i < num; i++)
     {
         if (accounts[i].accountnumber == accNum)
@@ -455,22 +539,29 @@ void deposit(account accounts[], int *count)
             if (strcmp(accounts[i].status, "active") != 0)
             {
                 printf("\nwarning!! the account status is inactive,transaction cannot be done");
+                clearbuffer();
+                asktocontinue();
                 return;
             }
             printf("\nenter the amount you want to deposit");
-            scanf("%f", &amount);
+            if (scanf("%f", &amount) != 1 || amount <= 0)
+            {
+                printf("\ninvalid input,transaction cannot be done\n");
+                clearbuffer();
+                asktocontinue();
+                return;
+            }
+            clearbuffer();
             if (amount > TRANSACTION_LIMIT)
             {
                 printf("\nmax deposit per transaction is %.2f ,transaction cannot be done\n", TRANSACTION_LIMIT);
+                asktocontinue();
                 return;
             }
-            if (amount <= 0)
-            {
-                printf("invalid amount");
-                return;
-            }
+
             accounts[i].balance = accounts[i].balance + amount;
-            sprintf(filename, "%lld.txt", accounts[i].accountnumber);
+            sprintf(filename, "./%lld.txt", accounts[i].accountnumber);
+
             FILE *fp = fopen(filename, "a");
             if (fp != NULL)
             {
@@ -480,18 +571,20 @@ void deposit(account accounts[], int *count)
             else
             {
                 printf("\nerror in opening transaction file\n");
+                asktocontinue();
                 return;
             }
             printf("\n---deposit completed successfully---\n");
             printf("current balance is: %.2f", accounts[i].balance);
+            saveaccounts(accounts, count);
+            asktocontinue();
             return;
         }
     }
     if (!found)
-    {
         printf("\naccount number cannot be found");
-        asktocontinue();
-    }
+    asktocontinue();
+    return;
 }
 int valid_email(const char *email)
 {
@@ -528,4 +621,207 @@ int checkstring(char s[])
             return 0;
     }
     return 1;
+}
+int dailylimit(long long accNum, float newAmount)
+{
+    char filename[50];
+    char line[200];
+    float totalWithdrawn = 0.0;
+    float amount;
+    sprintf(filename, "%lld.txt", accNum);
+    FILE *fp = fopen(filename, "r");
+    if (fp == NULL)
+        return 1;
+    while (fgets(line, sizeof(line), fp) != NULL)
+    {
+        if (strncmp(line, "withdraw", 8) == 0)
+        {
+            sscanf(line, "withdraw %f", &amount);
+            totalWithdrawn = totalWithdrawn + amount;
+        }
+    }
+    fclose(fp);
+    if (totalWithdrawn + newAmount > DAILY_LIMIT)
+        return 0; // limit exceeded
+    return 1;
+}
+
+void withDraw(account accounts[], int *count)
+{
+    int num = *count;
+    long long accNum;
+    int found = 0;
+    float amount;
+    char filename[50];
+    printf("\nenter your account number\n");
+    if (scanf("%lld", &accNum) != 1)
+    {
+        printf("invalid input \n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
+    for (int i = 0; i < num; i++)
+    {
+        if (accounts[i].accountnumber == accNum)
+        { // check law el account exist
+            found = 1;
+            if (strcmp(accounts[i].status, "active") != 0)
+            { // check law el account active wala la
+                printf("\nwarning!! the status of your account is inactive,transaction cannot be completed\n");
+                clearbuffer();
+                asktocontinue();
+                return;
+            }
+            printf("\nenter the amount you want to withdraw:\n");
+            if (scanf("%f", &amount) != 1 || amount <= 0)
+            {
+                printf("\ninvalid input,transaction cannot be done\n");
+                clearbuffer();
+                asktocontinue();
+                return;
+            }
+            clearbuffer();
+            if (amount > TRANSACTION_LIMIT)
+            {
+                printf("\nwarning!! max per transaction is 10000\n");
+                clearbuffer();
+                asktocontinue();
+                return;
+            }
+            if (amount > accounts[i].balance)
+            {
+                printf("\ninsufficent balance\n");
+                clearbuffer();
+                asktocontinue();
+                return;
+            }
+            sprintf(filename, "%lld.txt", accounts[i].accountnumber);
+
+            if (!dailylimit(accNum, amount))
+            {
+                printf("\n--daily limit has been exceeded--\n");
+                clearbuffer();
+                asktocontinue();
+                return;
+            }
+
+            accounts[i].balance = accounts[i].balance - amount;
+
+            FILE *fp = fopen(filename, "a");
+            if (fp != NULL)
+            {
+                fprintf(fp, "withdraw %.2f\n", amount);
+                fclose(fp);
+            }
+            printf("\n---withdrawal is done successfully---\n");
+            printf("the balance remaining in your account is %.2f\n", accounts[i].balance);
+            saveaccounts(accounts, count);
+
+            asktocontinue();
+            return;
+        }
+    }
+    if (!found)
+        printf("account number is not found\n");
+    clearbuffer();
+    asktocontinue();
+    return;
+}
+void transfer(account accounts[], int *count)
+{
+    int num = *count;
+    long long senderAcc, receiverAcc;
+    int senderIndex = -1, receiveIndex = -1;
+    float amount;
+    char senderFile[50], receiverFile[50];
+    printf("\nenter sender account number\n");
+    if (scanf("%lld", &senderAcc) != 1)
+    {
+        printf("invalid input\n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
+    clearbuffer();
+    printf("\nenter receiver account number\n");
+    if (scanf("%lld", &receiverAcc) != 1)
+    {
+        printf("invalid input\n");
+        clearbuffer();
+        asktocontinue();
+        return;
+    }
+    clearbuffer();
+    if (senderAcc == receiverAcc)
+    {
+        printf("Invalid input\n");
+        asktocontinue();
+        return;
+    }
+    for (int i = 0; i < num; i++)
+    {
+        if (accounts[i].accountnumber == senderAcc)
+            senderIndex = i;
+        if (accounts[i].accountnumber == receiverAcc)
+            receiveIndex = i;
+    }
+    if (receiveIndex == -1 || senderIndex == -1)
+    {
+        printf("\none or both accounts cannot be found");
+        asktocontinue();
+        return;
+    }
+    if (strcmp(accounts[senderIndex].status, "active") != 0 || strcmp(accounts[receiveIndex].status, "active") != 0)
+    {
+        printf("\nwarning!! one or both accounts' status is inactive\n");
+        asktocontinue();
+        return;
+    }
+    printf("\nenter amount you want to be transferred");
+    if (scanf("%f", &amount) != 1 || amount <= 0)
+    {
+        printf("\ninvalid input,transaction cannot be done\n");
+        while (getchar() != '\n')
+            ;
+        asktocontinue();
+        return;
+    }
+    while (getchar() != '\n')
+        ;
+    if (amount > TRANSACTION_LIMIT)
+    {
+        printf("\nwarning!! max transfer per transaction is %.2f\n", TRANSACTION_LIMIT);
+        asktocontinue();
+        return;
+    }
+    if (amount > accounts[senderIndex].balance)
+    {
+        printf("\nwarning!! no sufficient balance,transaction cannot be done\n");
+        asktocontinue();
+        return;
+    }
+    accounts[senderIndex].balance = accounts[senderIndex].balance - amount;
+    accounts[receiveIndex].balance = accounts[receiveIndex].balance + amount;
+    sprintf(senderFile, "%lld.txt", senderAcc);
+    FILE *fp = fopen(senderFile, "a");
+    if (fp != NULL)
+    {
+        fprintf(fp, "\nsent %.2f\n", amount);
+        fclose(fp);
+    }
+    sprintf(receiverFile, "%lld.txt", receiverAcc);
+    fp = fopen(receiverFile, "a");
+    if (fp != NULL)
+    {
+        fprintf(fp, "\n received %.2f", amount);
+        fclose(fp);
+    }
+
+    printf("\n---transfer completed successfully---\n");
+    printf("sender new balance: %.2f\n", accounts[senderIndex].balance);
+    printf("receiver new balance: %.2f\n", accounts[receiveIndex].balance);
+    saveaccounts(accounts, count);
+    asktocontinue();
+    return;
 }
