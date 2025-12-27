@@ -1,0 +1,40 @@
+# depslib dependency file v1.0
+1766845478 source:h:\cs\new final project\final-project\add.c
+	"add.h"
+	"loadacc.h"
+	<windows.h>
+	<stdio.h>
+	<string.h>
+	<ctype.h>
+
+1766859623 h:\cs\new final project\final-project\add.h
+	"account.h"
+	<windows.h>
+	<stdio.h>
+	<string.h>
+	<ctype.h>
+
+1766855878 h:\cs\new final project\final-project\account.h
+
+1766859412 h:\cs\new final project\final-project\loadacc.h
+	"account.h"
+	"add.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"ctype.h"
+
+1766844540 source:h:\cs\new final project\final-project\loadacc.c
+	"loadacc.h"
+	"add.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+	"ctype.h"
+
+1766858438 source:h:\cs\new final project\final-project\main.c
+	"loadacc.h"
+	<stdio.h>
+	<stdlib.h>
+	<string.h>
+

@@ -10,7 +10,7 @@ typedef struct {
     long long accountnumber;
     char name[100];
     char address[100];
-    double balance;
+    float balance;
     long long mobile;
     date dateopened;
     char status[100];
